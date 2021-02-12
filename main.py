@@ -1,5 +1,5 @@
 import sys
-import urllib
+import zlib
 import requests
 
 # HTTP eskaerak 4 atal ditu: metodoa, uria, goiburuak eta edukia
@@ -21,11 +21,15 @@ else:
     print("Errorea komandoa --- python main.py compress --- moduan jarri egin behar da")
     exit(0)
 
-erantzuna = requests.request(metodoa, uria, data=edukia, headers=goiburuak, allow_redirects=False)
+erantzuna = requests.request(metodoa, uria, data=edukia, headers=goiburuak, allow_redirects=False, stream=True)
 
 kodea = erantzuna.status_code
 deskribapena = erantzuna.reason
 print(str(kodea) + " " + deskribapena)
+print("RESPONSE CONTENT LENGTH: " + str(len(erantzuna.raw.data))+" byte")
 
-edukia = erantzuna.content
-print(edukia)
+if compressed:
+    edukia_compressed=erantzuna.raw.data
+    edukia_uncompressed=zlib.decompress(edukia_compressed,16+zlib.MAX_WBITS)
+    print("UNCOMPRESSED RESPONSE CONTENT LENGTH: "+str(len(erantzuna.raw.data))+" byte")
+
